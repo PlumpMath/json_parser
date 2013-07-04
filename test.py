@@ -33,3 +33,9 @@ class JsonParseTest(unittest.TestCase):
     def test_string_with_tick(self):
         string = '{"key":\'value\'}'
         self.assertRaises(ValueError, loads, string)
+
+    def test_hash_with_int(self):
+        string = '{"int":101}'
+        expected = json.loads(string)
+        actual = loads(string)
+        self.assertDictEqual(expected, actual)

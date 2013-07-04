@@ -22,6 +22,24 @@ def loads(string):
     return ret
 
 
+def get_generator(c):
+    """ Decides what generator to get, primes it, and returns it
+    """
+    if c == "{":
+        g = parse_hash()
+        g.send(None)
+        return g
+    if c == '"':
+        g = parse_string()
+        g.send(None)
+        return g
+    if c.isdigit():
+        g = parse_int()
+        g.send(None)
+        return g
+    raise ValueError("Unknown character alert: " + c)
+
+
 def parse_hash():
     """ Generator that slowly parses a JSON hash
     """
@@ -45,16 +63,20 @@ def parse_hash():
         if c != ":":
             raise ValueError("Missing a colon, it looks like this: :")
 
-        # values can be more than just strings, pretending they can't be for now
+        # values can be more than just strings...
         value = PARSING
-        g = parse_string()
-        g.send(None)
         c = (yield PARSING)
-        while value is PARSING:
+        g = get_generator(c)
+        while 1:
             value = g.send(c)
+            if value is not PARSING:
+                break
             c = (yield PARSING)
 
         hsh[key] = value
+        # We have a dangling quote, nothing to do but eat it
+        if c == '"':
+            c = (yield PARSING)
 
     yield hsh
 
@@ -63,13 +85,23 @@ def parse_string():
     """ Generator that slowly parses a string
     """
     string = []  # we have to use an array because python strings are immutable
-    c = (yield PARSING)
-    if c != '"':
-        raise ValueError("String start with double quotes, none of this single-quote stuff")
 
+    yield PARSING  # eat the ", execution can't get in here without one
     c = (yield PARSING)
     while c != '"':
         string.append(c)
         c = (yield PARSING)
 
     yield ''.join(string)
+
+
+def parse_int():
+    """ Generator that slowly parses an integer
+    """
+    integer = []
+    c = (yield PARSING)
+    while c not in [',', '}']:
+        integer.append(c)
+        c = (yield PARSING)
+
+    yield int(''.join(integer))
