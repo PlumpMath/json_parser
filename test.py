@@ -45,3 +45,21 @@ class JsonParseTest(unittest.TestCase):
         expected = json.loads(string)
         actual = loads(string)
         self.assertDictEqual(expected, actual)
+
+    def test_array_empty(self):
+        string = '[]'
+        expected = json.loads(string)
+        actual = loads(string)
+        self.assertListEqual(expected, actual)
+
+    def test_array_strings(self):
+        string = '["one","two","three"]'
+        expected = json.loads(string)
+        actual = loads(string)
+        self.assertListEqual(expected, actual)
+
+    def test_array_ints(self):
+        string = '[1,2,3]'
+        expected = json.loads(string)
+        actual = loads(string)
+        self.assertListEqual(expected, actual)

@@ -11,8 +11,11 @@ def loads(string):
     if c == "{":
         p = parse_hash()
         p.send(None)
+    elif c == "[":
+        p = parse_array()
+        p.send(None)
     else:
-        raise NotImplemented("You're going too fast!")
+        raise ValueError("JSON only supports hashes and arrays, not sure what you are doing.")
 
     for c in string:
         ret = p.send(c)
@@ -29,6 +32,9 @@ def get_generator(c):
         g = parse_hash()
         g.send(None)
         return g
+    if c == "[":
+        g = parse_array()
+        g.send(None)
     if c == '"':
         g = parse_string()
         g.send(None)
@@ -103,9 +109,34 @@ def parse_int():
     """
     integer = []
     c = (yield PARSING)
-    while c not in [',', '}']:
+    while c not in [',', '}', ']']:
         integer.append(c)
         c = (yield PARSING)
 
     yield int(''.join(integer))
     yield False
+
+
+def parse_array():
+    """ Generator that slowly parses an array
+    """
+    array = []
+
+    c = (yield PARSING)
+    while c != "]":
+        value = PARSING
+        c = (yield PARSING)
+        if c == ']':
+            break
+        g = get_generator(c)
+        while True:
+            value = g.send(c)
+            if value is not PARSING:
+                break
+            c = (yield PARSING)
+
+        array.append(value)
+        # Eat another character? I think this could be cleaner...
+        if g.send(None):
+            c = (yield PARSING)
+    yield array
