@@ -74,11 +74,12 @@ def parse_hash():
             c = (yield PARSING)
 
         hsh[key] = value
-        # We have a dangling quote, nothing to do but eat it
-        if c == '"':
+        # Eat another character? I think this could be cleaner...
+        if g.send(None):
             c = (yield PARSING)
 
     yield hsh
+    yield True  # the final yield tells me if I need to clean up a character or not
 
 
 def parse_string():
@@ -87,12 +88,14 @@ def parse_string():
     string = []  # we have to use an array because python strings are immutable
 
     yield PARSING  # eat the ", execution can't get in here without one
-    c = (yield PARSING)
-    while c != '"':
-        string.append(c)
+    while True:
         c = (yield PARSING)
+        if c == '"':
+            break
+        string.append(c)
 
     yield ''.join(string)
+    yield True
 
 
 def parse_int():
@@ -105,3 +108,4 @@ def parse_int():
         c = (yield PARSING)
 
     yield int(''.join(integer))
+    yield False

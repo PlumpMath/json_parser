@@ -39,3 +39,9 @@ class JsonParseTest(unittest.TestCase):
         expected = json.loads(string)
         actual = loads(string)
         self.assertDictEqual(expected, actual)
+
+    def test_hash_nested(self):
+        string = '{"hash":{"inception":"win"}}'
+        expected = json.loads(string)
+        actual = loads(string)
+        self.assertDictEqual(expected, actual)
