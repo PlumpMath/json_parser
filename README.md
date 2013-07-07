@@ -15,11 +15,13 @@ Usage
 
 Usage is identical to the standard simplejson parsing:
 
+```python
 >>> from parse import loads
 >>> loads('{"key":"value"}')
 {"key":"value"}
-
+```
 Running tests
 -------------
-
+```python
 >>> python test.py
+```
