@@ -63,3 +63,6 @@ class JsonParseTest(unittest.TestCase):
         expected = json.loads(string)
         actual = loads(string)
         self.assertListEqual(expected, actual)
+		
+if __name__ == "__main__":
+    unittest.main()
